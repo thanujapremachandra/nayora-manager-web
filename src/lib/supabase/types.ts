@@ -24,6 +24,7 @@ export type SlipFieldKey =
   | 'address'
   | 'phone_numbers'
   | 'ref_id'
+  | 'tracking_number'
   | 'cod_amount'
   | 'weight'
   | 'footer_text'

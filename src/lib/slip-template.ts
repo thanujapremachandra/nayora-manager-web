@@ -14,6 +14,7 @@ export const SLIP_FIELD_LABELS: Record<SlipFieldKey, string> = {
   address: 'Address',
   phone_numbers: 'Phone number(s)',
   ref_id: 'Reference ID',
+  tracking_number: 'Tracking number',
   cod_amount: 'COD amount',
   weight: 'Weight',
   footer_text: 'Footer text',
@@ -50,7 +51,7 @@ export interface SlipContext {
     | 'exchange_keep_courier_override'
     | 'bank_collect_override'
     | 'auto_weight_override'
-  >
+  > & { order_tracking?: { tracking_number: string }[] }
   items: Pick<OrderItemWithVariant, 'unit_price' | 'qty' | 'line_discount'>[]
   settings: Settings
 }
@@ -67,6 +68,8 @@ function resolveFieldValue(node: SlipNode, ctx: SlipContext): string {
       return ctx.order.phone2 ? `${ctx.order.phone1} / ${ctx.order.phone2}` : ctx.order.phone1
     case 'ref_id':
       return ctx.order.ref_id
+    case 'tracking_number':
+      return ctx.order.order_tracking?.map((t) => t.tracking_number).join(', ') ?? ''
     case 'cod_amount':
       return formatRs(computeCollectableAmount(ctx.order, ctx.items, ctx.settings))
     case 'weight':
@@ -141,6 +144,7 @@ export function sampleSlipContext(settings: Settings): SlipContext {
       phone1: '0771234567',
       phone2: '0719876543',
       ref_id: 'NYR-0007',
+      order_tracking: [{ tracking_number: 'CT123456789LK' }],
       weight_grams: 1200,
       payment_type: 'cod',
       cod_amount_override: null,
