@@ -1,15 +1,10 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { AppNav } from '@/components/nav'
 
-export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
+// Auth is enforced in middleware.ts (it redirects unauthenticated requests to
+// /login before this layout ever renders), so there's no getUser() here — that
+// would be a second, redundant cross-region round-trip to Supabase auth on
+// every navigation.
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       {/* Sidebar (desktop) */}
