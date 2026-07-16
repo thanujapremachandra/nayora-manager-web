@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getSettings } from '@/lib/db/settings'
 import { listProducts } from '@/lib/db/products'
 import { listDismissedAlertKeys } from '@/lib/db/dismissed-alerts'
+import { getVariantSalesTotals } from '@/lib/db/analytics'
 import { StockManager } from '@/components/stock/stock-manager'
 
 export const metadata: Metadata = { title: 'Stock' }
@@ -16,10 +17,11 @@ export default async function StockPage({ searchParams }: Props) {
   const supabase = await createClient()
 
   try {
-    const [settings, products, dismissedAlertKeys] = await Promise.all([
+    const [settings, products, dismissedAlertKeys, sales] = await Promise.all([
       getSettings(supabase),
       listProducts(supabase),
       listDismissedAlertKeys(supabase),
+      getVariantSalesTotals(supabase),
     ])
 
     return (
@@ -28,6 +30,7 @@ export default async function StockPage({ searchParams }: Props) {
         initialDismissedAlertKeys={Array.from(dismissedAlertKeys)}
         settings={settings}
         initialStatusFilter={status}
+        variantSales={sales}
       />
     )
   } catch (err) {

@@ -74,18 +74,20 @@
   [data-theme='dark'] {
     color-scheme: dark;
 
-    --surface: 23 23 29;
+    /* Grays carry a blue-violet undertone (not pure neutral) so dark mode
+       reads as a designed palette rather than flat black-and-one-color. */
+    --surface: 24 23 34;
 
-    --gray-50: 11 11 16;
-    --gray-100: 30 30 38;
-    --gray-200: 42 42 52;
-    --gray-300: 58 58 70;
-    --gray-400: 118 118 134;
-    --gray-500: 148 148 163;
-    --gray-600: 176 176 190;
-    --gray-700: 209 209 220;
-    --gray-800: 228 228 235;
-    --gray-900: 243 243 247;
+    --gray-50: 12 11 20;
+    --gray-100: 33 31 48;
+    --gray-200: 46 43 64;
+    --gray-300: 62 58 84;
+    --gray-400: 122 118 144;
+    --gray-500: 152 148 172;
+    --gray-600: 180 176 198;
+    --gray-700: 211 208 224;
+    --gray-800: 229 227 238;
+    --gray-900: 244 243 250;
 
     --brand-50: 40 33 66;
     --brand-100: 52 42 88;
@@ -165,6 +167,16 @@
     @apply bg-gray-50 font-sans text-gray-900 antialiased;
   }
 
+  /* Dark mode gets two faint color glows (brand top-right, warm accent
+     bottom-left) so the page has depth instead of a flat dark field.
+     fixed attachment keeps them stable while scrolling. */
+  [data-theme='dark'] body {
+    background-image:
+      radial-gradient(60rem 40rem at 85% -10%, rgb(var(--brand-500) / 0.07), transparent 60%),
+      radial-gradient(50rem 35rem at -10% 110%, rgb(var(--accent-400) / 0.045), transparent 60%);
+    background-attachment: fixed;
+  }
+
   /* Big numerals and headings use the display face. */
   h1 {
     @apply font-display tracking-tight;
@@ -221,6 +233,17 @@
 
   .seg-item-active {
     @apply bg-gray-900 text-gray-50 shadow-sm hover:text-gray-50;
+  }
+
+  /* Interactive list cards/rows (reference-style): subtle border always,
+     lift + brighter border on hover. */
+  .card-hover {
+    @apply transition-all duration-150 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md;
+  }
+
+  /* Status pill with a leading dot (see <StatusBadge/>). */
+  .status-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold;
   }
 
   /* Route-loading skeleton block */

@@ -4,7 +4,8 @@ import { useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { setTracking, removeTracking, findDuplicateTracking, updateOrder } from '@/lib/db/orders'
 import { computeCollectableAmount, effectiveWeightGrams, formatWeight, gramsToKgG, kgGToGrams } from '@/lib/pricing'
-import { STATUS_STYLES, STATUS_LABELS, orderContentsSummary } from '@/lib/order-helpers'
+import { STATUS_LABELS, orderContentsSummary } from '@/lib/order-helpers'
+import { StatusBadge } from './status-badge'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { keepDigits } from '@/lib/input-format'
 import type { OrderWithDetails } from '@/lib/order-helpers'
@@ -94,7 +95,7 @@ export function OrderRow({ order, settings, selected, onToggleSelect, onEdit, on
 
   return (
     <div
-      className="border-b border-gray-100 py-3"
+      className="card card-hover mb-2 p-3.5"
       onContextMenu={(e) => {
         e.preventDefault()
         startQuickEdit()
@@ -103,59 +104,85 @@ export function OrderRow({ order, settings, selected, onToggleSelect, onEdit, on
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchEnd}
     >
-      <div className="flex flex-wrap items-start gap-3">
-        <input type="checkbox" checked={selected} onChange={onToggleSelect} className="mt-1.5 h-4 w-4" aria-label={`Select order ${order.ref_id}`} />
+      {/* Mobile: wrapping stack. Desktop: one row, info spread across
+          fixed columns (identity | contents | tracking | weight | COD | controls). */}
+      <div className="flex flex-wrap items-start gap-3 md:grid md:grid-cols-[1.25rem_1.4fr_1.5fr_minmax(7rem,1fr)_5rem_6.5rem_auto] md:items-center">
+        <input type="checkbox" checked={selected} onChange={onToggleSelect} className="mt-1.5 h-4 w-4 md:mt-0" aria-label={`Select order ${order.ref_id}`} />
 
-        <button onClick={onEdit} className="flex-1 text-left">
-          <div className="flex items-center gap-2">
+        <button onClick={onEdit} className="min-w-0 flex-1 text-left md:flex-none">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-sm font-semibold text-gray-900">{order.ref_id}</span>
-            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[order.status]}`}>
-              {STATUS_LABELS[order.status]}
-            </span>
+            <StatusBadge status={order.status} />
             {order.is_exchange && (
-              <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">Exchange</span>
+              <span className="status-pill border-purple-700/25 bg-purple-100 text-purple-700">
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-purple-700" />
+                Exchange
+              </span>
             )}
           </div>
-          <p className="text-sm text-gray-700">
-            {order.customer_name} · {order.phone1}
+          <p className="mt-0.5 truncate text-sm text-gray-700">
+            {order.customer_name} <span className="text-gray-400">·</span> {order.phone1}
           </p>
-          <p className="truncate text-xs text-gray-500">{itemsSummary || 'No items'}</p>
         </button>
 
-        <div className="text-right text-sm">
-          <p className="font-semibold text-gray-900">Rs. {cod.toLocaleString()}</p>
-          <p className="text-xs text-gray-500">{formatWeight(effectiveWeightGrams(order, order.order_items, settings))}</p>
+        <p className="w-full truncate text-xs text-gray-500 md:w-auto" title={itemsSummary}>
+          {itemsSummary || 'No items'}
+        </p>
+
+        {/* Tracking (desktop column; wraps below on mobile) */}
+        <div className="min-w-0">
+          {!quickEditOpen &&
+            (tracking ? (
+              <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700">
+                <button onClick={startQuickEdit} className="truncate font-mono hover:underline">
+                  {tracking.tracking_number}
+                </button>
+                <button onClick={() => removeTracking(createClient(), tracking.id).then(onChanged)} aria-label="Remove tracking" className="shrink-0 text-gray-400 hover:text-red-600">
+                  ×
+                </button>
+              </span>
+            ) : (
+              <button onClick={startQuickEdit} className="text-xs font-medium text-brand-600 hover:text-brand-700">
+                + Tracking
+              </button>
+            ))}
         </div>
 
-        <select
-          value={order.status === 'frozen' ? '' : order.status}
-          onChange={(e) => onSetStatus(e.target.value as Order['status'])}
-          className="input w-auto py-1 text-xs"
-          aria-label="Order status"
-        >
-          {order.status === 'frozen' && <option value="">Frozen</option>}
-          {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {STATUS_LABELS[s]}
-            </option>
-          ))}
-        </select>
+        <p className="text-xs text-gray-500">{formatWeight(effectiveWeightGrams(order, order.order_items, settings))}</p>
 
-        {order.status === 'frozen' ? (
-          <button onClick={onUnfreeze} className="btn-secondary py-1 text-xs">
-            Unfreeze
-          </button>
-        ) : (
-          order.status === 'pending' && (
-            <button onClick={onFreeze} className="btn-secondary py-1 text-xs">
-              Freeze
+        <p className="text-right font-display text-sm font-semibold text-gray-900">Rs. {cod.toLocaleString()}</p>
+
+        <div className="flex items-center gap-2">
+          <select
+            value={order.status === 'frozen' ? '' : order.status}
+            onChange={(e) => onSetStatus(e.target.value as Order['status'])}
+            className="input w-auto py-1 text-xs"
+            aria-label="Order status"
+          >
+            {order.status === 'frozen' && <option value="">Frozen</option>}
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>
+                {STATUS_LABELS[s]}
+              </option>
+            ))}
+          </select>
+
+          {order.status === 'frozen' ? (
+            <button onClick={onUnfreeze} className="btn-secondary py-1 text-xs">
+              Unfreeze
             </button>
-          )
-        )}
+          ) : (
+            order.status === 'pending' && (
+              <button onClick={onFreeze} className="btn-secondary py-1 text-xs">
+                Freeze
+              </button>
+            )
+          )}
+        </div>
       </div>
 
-      {/* Weight + tracking — click, right-click, or long-press to edit both together */}
-      <div className="ml-7 mt-2">
+      {/* Weight + tracking quick edit — right-click or long-press a row */}
+      <div className={quickEditOpen ? 'mt-2' : 'hidden'}>
         {quickEditOpen ? (
           <form onSubmit={submitQuickEdit} className="flex flex-wrap items-end gap-2 rounded-lg bg-gray-50 p-2">
             <div>
@@ -199,24 +226,7 @@ export function OrderRow({ order, settings, selected, onToggleSelect, onEdit, on
             </button>
             {quickEditError && <span className="text-xs text-red-600">{quickEditError}</span>}
           </form>
-        ) : (
-          <div className="flex flex-wrap items-center gap-1.5">
-            {tracking ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-                <button onClick={startQuickEdit} className="hover:underline">
-                  {tracking.tracking_number}
-                </button>
-                <button onClick={() => removeTracking(createClient(), tracking.id).then(onChanged)} aria-label="Remove tracking" className="text-gray-400 hover:text-red-600">
-                  ×
-                </button>
-              </span>
-            ) : (
-              <button onClick={startQuickEdit} className="text-xs font-medium text-brand-600 hover:text-brand-700">
-                + Tracking
-              </button>
-            )}
-          </div>
-        )}
+        ) : null}
       </div>
 
       <ConfirmDialog

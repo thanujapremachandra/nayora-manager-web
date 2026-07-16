@@ -23,6 +23,7 @@ import { keepDecimal, keepPhone } from '@/lib/input-format'
 import { formatRs } from '@/lib/stock-helpers'
 import { ProductPicker } from './product-picker'
 import { OrderSummaryPopup } from './order-summary-popup'
+import { ExchangeLink } from './exchange-link'
 import type { OrderWithDetails } from '@/lib/order-helpers'
 import type { Order, Settings } from '@/lib/supabase/types'
 
@@ -691,6 +692,10 @@ export function OrderDialog({ open, onClose, onSaved, orderId, sessionId, settin
               />
               Exchange order (sending a replacement, collecting the old item back)
             </label>
+
+            {!isCreating && isExchange && (
+              <ExchangeLink order={order} onChanged={() => refetch(order.id)} />
+            )}
 
             <div>
               <label className="label mb-1">

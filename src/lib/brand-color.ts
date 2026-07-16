@@ -90,3 +90,34 @@ export function buildBrandCss(hex: string): string {
       .join('')
   return `:root{${toBlock(light)}}[data-theme='dark']{${toBlock(dark)}}`
 }
+
+export function hexToTriplet(hex: string): string {
+  return triplet(hexToRgb(normalizeHex(hex)))
+}
+
+export interface ThemeOverrides {
+  brand?: string | null
+  cardLight?: string | null
+  cardDark?: string | null
+  bgLight?: string | null
+  bgDark?: string | null
+}
+
+// Combined theme override: brand ramp + per-theme card (surface) and page
+// background (--gray-50, the body color) overrides. Any null/invalid piece
+// falls back to the built-in default.
+export function buildThemeCss(o: ThemeOverrides): string {
+  let css = o.brand && isValidHex(o.brand) ? buildBrandCss(o.brand) : ''
+
+  let lightBlock = ''
+  if (o.cardLight && isValidHex(o.cardLight)) lightBlock += `--surface:${hexToTriplet(o.cardLight)};`
+  if (o.bgLight && isValidHex(o.bgLight)) lightBlock += `--gray-50:${hexToTriplet(o.bgLight)};`
+  if (lightBlock) css += `:root{${lightBlock}}`
+
+  let darkBlock = ''
+  if (o.cardDark && isValidHex(o.cardDark)) darkBlock += `--surface:${hexToTriplet(o.cardDark)};`
+  if (o.bgDark && isValidHex(o.bgDark)) darkBlock += `--gray-50:${hexToTriplet(o.bgDark)};`
+  if (darkBlock) css += `[data-theme='dark']{${darkBlock}}`
+
+  return css
+}

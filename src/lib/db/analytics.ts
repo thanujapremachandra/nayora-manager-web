@@ -97,6 +97,31 @@ export interface SalesSummary {
   totalProfit: number
 }
 
+// All-time per-variant sales for the Stock table. Only 'sent' orders count
+// (returned/cancelled never made it or came back); exchange replacements
+// consume stock, so their qty counts, but no money is collected, so their
+// revenue doesn't. Keyed by variant id — the caller rolls up to products.
+export interface VariantSalesTotal {
+  qty: number
+  revenue: number
+}
+
+export async function getVariantSalesTotals(client: TypedClient): Promise<Record<string, VariantSalesTotal>> {
+  const { data, error } = await client
+    .from('order_item_sales')
+    .select('variant_id, qty, line_revenue, is_exchange')
+    .eq('order_status', 'sent')
+  if (error) throw new Error(`Failed to load sales totals: ${error.message}`)
+
+  const totals: Record<string, VariantSalesTotal> = {}
+  for (const row of (data ?? []) as Pick<OrderItemSale, 'variant_id' | 'qty' | 'line_revenue' | 'is_exchange'>[]) {
+    const entry = (totals[row.variant_id] ??= { qty: 0, revenue: 0 })
+    entry.qty += row.qty
+    if (!row.is_exchange) entry.revenue += row.line_revenue
+  }
+  return totals
+}
+
 export async function getSalesSummary(client: TypedClient, topN = 8): Promise<SalesSummary> {
   const since = new Date(Date.now() - SALES_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString()
 

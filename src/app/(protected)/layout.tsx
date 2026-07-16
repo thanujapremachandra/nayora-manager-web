@@ -3,7 +3,7 @@ import { WhatsNew } from '@/components/whats-new'
 import { UpdatePrompt } from '@/components/update-prompt'
 import { createClient } from '@/lib/supabase/server'
 import { getSettings } from '@/lib/db/settings'
-import { buildBrandCss, isValidHex } from '@/lib/brand-color'
+import { buildThemeCss } from '@/lib/brand-color'
 
 // Auth is enforced in middleware.ts (it redirects unauthenticated requests to
 // /login before this layout ever renders), so there's no getUser() here — that
@@ -17,11 +17,16 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   let brandCss: string | null = null
   try {
     const settings = await getSettings(await createClient())
-    if (settings.brand_color && isValidHex(settings.brand_color)) {
-      brandCss = buildBrandCss(settings.brand_color)
-    }
+    const css = buildThemeCss({
+      brand: settings.brand_color,
+      cardLight: settings.card_color_light,
+      cardDark: settings.card_color_dark,
+      bgLight: settings.bg_color_light,
+      bgDark: settings.bg_color_dark,
+    })
+    if (css) brandCss = css
   } catch {
-    // No settings row / transient failure — fall back to the default violet.
+    // No settings row / transient failure — fall back to the defaults.
   }
 
   return (

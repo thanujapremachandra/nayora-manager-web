@@ -135,7 +135,7 @@ export function AppNav() {
       {/* ── Sidebar (desktop) ── */}
       {/* sticky + h-dvh: always exactly viewport height, never stretches with
           page content; the page scrolls beside it. */}
-      <aside className="hidden w-56 shrink-0 flex-col border-r border-gray-200 bg-surface md:sticky md:top-0 md:flex md:h-dvh">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-gray-200 bg-surface md:sticky md:top-0 md:flex md:h-dvh">
         {/* Wordmark */}
         <div className="border-b border-gray-200 px-5 py-5">
           <Link href="/" className="font-display text-[1.35rem] font-bold lowercase tracking-tight text-gray-900">

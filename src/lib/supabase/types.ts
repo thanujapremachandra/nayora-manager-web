@@ -96,6 +96,10 @@ export type Database = {
           auto_weight_over_grams: number
           auto_weight_under_grams: number
           brand_color: string | null
+          card_color_light: string | null
+          card_color_dark: string | null
+          bg_color_light: string | null
+          bg_color_dark: string | null
           created_at: string
           updated_at: string
         }
@@ -120,6 +124,10 @@ export type Database = {
           auto_weight_over_grams?: number
           auto_weight_under_grams?: number
           brand_color?: string | null
+          card_color_light?: string | null
+          card_color_dark?: string | null
+          bg_color_light?: string | null
+          bg_color_dark?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -144,6 +152,10 @@ export type Database = {
           auto_weight_over_grams?: number
           auto_weight_under_grams?: number
           brand_color?: string | null
+          card_color_light?: string | null
+          card_color_dark?: string | null
+          bg_color_light?: string | null
+          bg_color_dark?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -432,6 +444,7 @@ export type Database = {
           exchange_keep_courier_override: boolean | null
           bank_collect_override: boolean | null
           auto_weight_override: boolean | null
+          exchange_source_order_id: string | null
           created_at: string
           updated_at: string
         }
@@ -460,6 +473,7 @@ export type Database = {
           exchange_keep_courier_override?: boolean | null
           bank_collect_override?: boolean | null
           auto_weight_override?: boolean | null
+          exchange_source_order_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -488,6 +502,7 @@ export type Database = {
           exchange_keep_courier_override?: boolean | null
           bank_collect_override?: boolean | null
           auto_weight_override?: boolean | null
+          exchange_source_order_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -694,6 +709,7 @@ export type Database = {
           product_name: string
           order_status: 'pending' | 'frozen' | 'issue' | 'sent' | 'returned' | 'cancelled'
           order_created_at: string
+          is_exchange: boolean
         }
         Relationships: []
       }

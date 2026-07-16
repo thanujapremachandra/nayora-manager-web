@@ -1,12 +1,12 @@
 -- ============================================================
 -- RESET 2 of 3  —  REBUILD THE FULL SCHEMA
 -- ============================================================
--- The complete, current schema — every migration 001 → 015
+-- The complete, current schema — every migration 001 → 017
 -- consolidated into one clean file (final column state only,
 -- none of the add-then-drop churn). Running this on the empty
 -- schema left by RESET_1 fully recreates the database.
 --
--- If you prefer, running migrations 001…015 in order produces
+-- If you prefer, running migrations 001…017 in order produces
 -- the exact same result; this is just the single-file version.
 -- ============================================================
 
@@ -36,6 +36,10 @@ CREATE TABLE settings (
   auto_weight_over_grams int NOT NULL DEFAULT 1000,
   auto_weight_under_grams int NOT NULL DEFAULT 800,
   brand_color text,
+  card_color_light text,
+  card_color_dark text,
+  bg_color_light text,
+  bg_color_dark text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -133,6 +137,7 @@ CREATE TABLE orders (
   exchange_keep_courier_override boolean,
   bank_collect_override boolean,
   auto_weight_override boolean,
+  exchange_source_order_id uuid REFERENCES orders (id) ON DELETE SET NULL,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -241,6 +246,10 @@ CREATE INDEX idx_product_images_product_id  ON product_images (product_id);
 CREATE INDEX idx_tracking_pool_available ON tracking_pool (created_at ASC) WHERE order_id IS NULL;
 CREATE INDEX idx_tracking_pool_order     ON tracking_pool (order_id)       WHERE order_id IS NOT NULL;
 
+-- Exchange chain lookups (which orders replace this one).
+CREATE INDEX idx_orders_exchange_source ON orders (exchange_source_order_id)
+  WHERE exchange_source_order_id IS NOT NULL;
+
 -- ─── Analytics views (Home dashboard) ────────────────────────
 -- security_invoker=true so they respect the querying user's RLS.
 CREATE VIEW order_financials WITH (security_invoker = true) AS
@@ -276,7 +285,8 @@ SELECT
   p.global_cost,
   p.name AS product_name,
   o.status AS order_status,
-  o.created_at AS order_created_at
+  o.created_at AS order_created_at,
+  o.is_exchange
 FROM order_items oi
 JOIN orders o   ON o.id = oi.order_id
 JOIN variants v ON v.id = oi.variant_id

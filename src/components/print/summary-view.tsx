@@ -34,9 +34,11 @@ export function SummaryView({ sessionName, orders, settings }: Props) {
         {orders.map((order) => {
           const total = computeCollectableAmount(order, order.order_items, settings)
           const items = orderContentsSummary(order)
+          const tracking = order.order_tracking.map((t) => t.tracking_number).join(', ')
           return (
             <p key={order.id} className="break-inside-avoid leading-snug">
               <span className="font-mono font-semibold">{order.ref_id}</span>
+              {tracking && <span className="font-mono text-gray-600"> ({tracking})</span>}
               {' - '}
               <span>{order.customer_name}</span>
               {': '}

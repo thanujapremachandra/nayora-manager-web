@@ -11,14 +11,17 @@ interface Props {
 
 export function SessionCard({ session, counts, onOpen }: Props) {
   return (
-    <button onClick={onOpen} className="card p-4 text-left hover:bg-gray-50">
+    <button onClick={onOpen} className="card card-hover p-4 text-left">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-gray-900">{session.name}</h3>
         <span
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-            session.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+          className={`status-pill ${
+            session.status === 'completed'
+              ? 'border-green-700/25 bg-green-100 text-green-700'
+              : 'border-blue-700/25 bg-blue-100 text-blue-700'
           }`}
         >
+          <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${session.status === 'completed' ? 'bg-green-600' : 'bg-blue-700'}`} />
           {session.status === 'completed' ? 'Completed' : 'Pending'}
         </span>
       </div>

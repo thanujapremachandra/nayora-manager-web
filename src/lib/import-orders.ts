@@ -202,6 +202,7 @@ export function importRowToOrder(row: ImportedOrderRow): OrderWithDetails & { ba
     exchange_keep_courier_override: null,
     bank_collect_override: null,
     auto_weight_override: null,
+    exchange_source_order_id: null,
     created_at: now,
     updated_at: now,
     backText: row.context ?? undefined,

@@ -110,6 +110,18 @@ export function OrdersManager({
     [sessions]
   )
 
+  const totals = useMemo(() => {
+    let orders = 0
+    let pending = 0
+    let frozen = 0
+    counts.forEach((c) => {
+      orders += c.total
+      pending += c.pending
+      frozen += c.frozen
+    })
+    return { orders, pending, frozen, completedSessions: sessions.filter((s) => s.status === 'completed').length }
+  }, [counts, sessions])
+
   if (activeSession) {
     return (
       <SessionDetail
@@ -181,7 +193,7 @@ export function OrdersManager({
           ) : (
             <ul className="space-y-2">
               {flatResults.map((order) => (
-                <li key={order.id} className="card flex items-center justify-between gap-3 p-3">
+                <li key={order.id} className="card card-hover flex items-center justify-between gap-3 p-3">
                   <button onClick={() => setViewingOrderId(order.id)} className="min-w-0 flex-1 text-left">
                     <p className="font-mono text-sm font-semibold text-gray-900">{order.ref_id}</p>
                     <p className="text-sm text-gray-600">{order.customer_name} · {order.phone1}</p>
@@ -201,23 +213,104 @@ export function OrdersManager({
           )}
         </div>
       ) : sessions.length === 0 ? (
-        <div className="mt-8 flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 py-16 text-center">
+        <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-16 text-center">
           <h3 className="text-sm font-semibold text-gray-900">No sessions yet</h3>
           <p className="mt-1 max-w-xs text-sm text-gray-500">
             Create a session to start logging today&apos;s orders.
           </p>
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sessionsSorted.map((session) => (
-            <SessionCard
-              key={session.id}
-              session={session}
-              counts={counts.get(session.id) ?? { total: 0, pending: 0, frozen: 0 }}
-              onOpen={() => openSession(session)}
-            />
-          ))}
-        </div>
+        <>
+          {/* Totals across all sessions */}
+          <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="card p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Total orders</p>
+              <p className="mt-1 font-display text-2xl font-bold text-gray-900">{totals.orders}</p>
+            </div>
+            <div className="card p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Pending orders</p>
+              <p className="mt-1 font-display text-2xl font-bold text-blue-700">{totals.pending}</p>
+            </div>
+            <div className="card p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Frozen orders</p>
+              <p className="mt-1 font-display text-2xl font-bold text-cyan-600">{totals.frozen}</p>
+            </div>
+            <div className="card p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Sessions</p>
+              <p className="mt-1 font-display text-2xl font-bold text-gray-900">
+                {sessions.length}
+                <span className="ml-1.5 text-sm font-medium text-gray-400">
+                  {totals.completedSessions} done
+                </span>
+              </p>
+            </div>
+          </div>
+
+          {/* Desktop: sessions table */}
+          <div className="card mt-4 hidden overflow-hidden md:block">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-100/50 text-left text-xs text-gray-500">
+                  <th className="px-4 py-3 font-medium">Session</th>
+                  <th className="px-4 py-3 font-medium">Created</th>
+                  <th className="px-4 py-3 font-medium">Orders</th>
+                  <th className="px-4 py-3 font-medium">Frozen</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {sessionsSorted.map((session) => {
+                  const c = counts.get(session.id) ?? { total: 0, pending: 0, frozen: 0 }
+                  return (
+                    <tr
+                      key={session.id}
+                      onClick={() => openSession(session)}
+                      className="cursor-pointer border-b border-gray-100 transition-colors last:border-0 hover:bg-gray-100/60"
+                    >
+                      <td className="px-4 py-3 font-semibold text-gray-900">{session.name}</td>
+                      <td className="px-4 py-3 text-gray-500">{new Date(session.created_at).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 font-display font-semibold text-gray-900">{c.total}</td>
+                      <td className="px-4 py-3">
+                        {c.frozen > 0 ? <span className="font-medium text-cyan-600">{c.frozen}</span> : <span className="text-gray-400">—</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`status-pill ${
+                            session.status === 'completed'
+                              ? 'border-green-700/25 bg-green-100 text-green-700'
+                              : 'border-blue-700/25 bg-blue-100 text-blue-700'
+                          }`}
+                        >
+                          <span
+                            aria-hidden
+                            className={`h-1.5 w-1.5 rounded-full ${session.status === 'completed' ? 'bg-green-600' : 'bg-blue-700'}`}
+                          />
+                          {session.status === 'completed' ? 'Completed' : 'Pending'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="text-sm font-medium text-brand-600">Open →</span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile: stacked cards */}
+          <div className="mt-4 grid grid-cols-1 gap-3 md:hidden">
+            {sessionsSorted.map((session) => (
+              <SessionCard
+                key={session.id}
+                session={session}
+                counts={counts.get(session.id) ?? { total: 0, pending: 0, frozen: 0 }}
+                onOpen={() => openSession(session)}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       <OrderSummaryPopup orderId={viewingOrderId} settings={settings} onClose={() => setViewingOrderId(null)} />
