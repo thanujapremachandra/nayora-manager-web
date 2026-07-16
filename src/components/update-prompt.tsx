@@ -49,7 +49,7 @@ export function UpdatePrompt() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center p-4 sm:bottom-4">
-      <div className="flex w-full max-w-md items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-lg">
+      <div className="flex w-full max-w-md items-center gap-3 rounded-2xl border border-gray-200 bg-surface px-4 py-3 shadow-lg">
         <div className="flex-1 text-sm">
           <p className="font-semibold text-gray-900">A new version is available</p>
           <p className="text-gray-500">Reload to get the latest updates.</p>

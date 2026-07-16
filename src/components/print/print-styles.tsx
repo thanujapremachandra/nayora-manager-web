@@ -1,3 +1,5 @@
+import { ForceLightTheme } from './force-light-theme'
+
 interface Props {
   orientation?: 'portrait' | 'landscape'
   margin?: string
@@ -13,6 +15,8 @@ interface Props {
 // its own orientation/margin since it controls the whole page itself.
 export function PrintStyles({ orientation = 'portrait', margin = '10mm' }: Props = {}) {
   return (
+    <>
+    <ForceLightTheme />
     <style>{`
       @page {
         size: A4 ${orientation};
@@ -54,5 +58,6 @@ export function PrintStyles({ orientation = 'portrait', margin = '10mm' }: Props
         overflow: hidden;
       }
     `}</style>
+    </>
   )
 }

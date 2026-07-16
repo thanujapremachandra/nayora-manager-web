@@ -28,7 +28,7 @@ export function DuplexSlipView({ orders, settings }: Props) {
     <div>
       <PrintStyles />
 
-      <div className="no-print sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white p-4">
+      <div className="no-print sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-surface p-4">
         <div>
           <p className="text-sm font-semibold text-gray-900">{orders.length} slip(s) — {pages.length} sheet(s)</p>
           {duplex ? (

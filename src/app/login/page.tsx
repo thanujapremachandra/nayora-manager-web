@@ -7,13 +7,12 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
-        {/* Logo / wordmark */}
+        {/* Wordmark */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-2xl font-bold text-white shadow-lg">
-            N
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Nayora Clothing</h1>
-          <p className="mt-1 text-sm text-gray-500">Sign in to continue</p>
+          <p className="font-display text-4xl font-bold lowercase tracking-tight text-gray-900">
+            nayora<span className="text-brand-500">.</span>
+          </p>
+          <p className="mt-2 text-sm text-gray-500">Sign in to continue</p>
         </div>
 
         <div className="card p-6">

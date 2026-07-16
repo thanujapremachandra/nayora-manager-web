@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const NAV_ITEMS = [
   {
@@ -108,7 +109,7 @@ export function AppNav() {
       {/* ── Bottom tab bar (mobile) ── */}
       <nav
         aria-label="Main navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 flex border-t border-gray-200 bg-white md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 flex items-stretch border-t border-gray-200 bg-surface/90 backdrop-blur-md md:hidden"
       >
         {NAV_ITEMS.map(({ href, label, icon }) => {
           const active = isActive(href)
@@ -126,20 +127,24 @@ export function AppNav() {
             </Link>
           )
         })}
+        <div className="flex items-center pr-1">
+          <ThemeToggle />
+        </div>
       </nav>
 
       {/* ── Sidebar (desktop) ── */}
-      <aside className="hidden w-56 shrink-0 flex-col border-r border-gray-200 bg-white md:flex">
-        {/* Logo */}
-        <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-4">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
-            N
-          </div>
-          <span className="truncate text-sm font-semibold text-gray-900">Nayora Clothing</span>
+      {/* sticky + h-dvh: always exactly viewport height, never stretches with
+          page content; the page scrolls beside it. */}
+      <aside className="hidden w-56 shrink-0 flex-col border-r border-gray-200 bg-surface md:sticky md:top-0 md:flex md:h-dvh">
+        {/* Wordmark */}
+        <div className="border-b border-gray-200 px-5 py-5">
+          <Link href="/" className="font-display text-[1.35rem] font-bold lowercase tracking-tight text-gray-900">
+            nayora<span className="text-brand-500">.</span>
+          </Link>
         </div>
 
         {/* Nav links */}
-        <nav className="flex-1 space-y-0.5 p-3" aria-label="Main navigation">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Main navigation">
           {NAV_ITEMS.map(({ href, label, icon }) => {
             const active = isActive(href)
             return (
@@ -147,10 +152,10 @@ export function AppNav() {
                 key={href}
                 href={href}
                 aria-current={active ? 'page' : undefined}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                   active
                     ? 'bg-brand-50 text-brand-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}
               >
                 {icon(active)}
@@ -160,11 +165,12 @@ export function AppNav() {
           })}
         </nav>
 
-        {/* Sign out */}
-        <div className="border-t border-gray-200 p-3">
+        {/* Theme + sign out */}
+        <div className="space-y-1 border-t border-gray-200 p-3">
+          <ThemeToggle showLabel />
           <button
             onClick={handleSignOut}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} className="h-5 w-5" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />

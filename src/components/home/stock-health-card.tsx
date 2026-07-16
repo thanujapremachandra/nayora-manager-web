@@ -6,6 +6,33 @@ interface Props {
   health: StockHealth
 }
 
+// Reference-style "row chips": each line is its own raised rounded row with
+// the label left and a bold figure right; status rows get a colored dot.
+function Row({
+  href,
+  label,
+  value,
+  dot,
+}: {
+  href: string
+  label: string
+  value: number
+  dot?: string
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center justify-between rounded-xl bg-gray-100 px-3.5 py-2.5 text-sm transition-colors hover:bg-gray-200"
+    >
+      <span className="flex items-center gap-2 text-gray-700">
+        {dot && <span aria-hidden className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />}
+        {label}
+      </span>
+      <span className="font-display font-semibold text-gray-900">{value}</span>
+    </Link>
+  )
+}
+
 export function StockHealthCard({ health }: Props) {
   return (
     <div className="card p-4">
@@ -14,31 +41,19 @@ export function StockHealthCard({ health }: Props) {
       <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
         <div>
           <p className="text-gray-500">Value at cost</p>
-          <p className="font-semibold text-gray-900">{formatRs(health.stockValueAtCost)}</p>
+          <p className="font-display font-semibold text-gray-900">{formatRs(health.stockValueAtCost)}</p>
         </div>
         <div>
           <p className="text-gray-500">Value at price</p>
-          <p className="font-semibold text-gray-900">{formatRs(health.stockValueAtPrice)}</p>
+          <p className="font-display font-semibold text-gray-900">{formatRs(health.stockValueAtPrice)}</p>
         </div>
       </div>
 
-      <div className="mt-3 space-y-1.5 border-t border-gray-100 pt-3 text-sm">
-        <Link href="/stock" className="flex justify-between text-gray-600 hover:text-brand-600">
-          <span>In stock</span>
-          <span className="font-medium">{health.inStockCount}</span>
-        </Link>
-        <Link href="/stock?status=low_stock" className="flex justify-between text-amber-700 hover:underline">
-          <span>Low stock</span>
-          <span className="font-medium">{health.lowStockCount}</span>
-        </Link>
-        <Link href="/stock?status=out_of_stock" className="flex justify-between text-gray-600 hover:text-brand-600">
-          <span>Out of stock</span>
-          <span className="font-medium">{health.outOfStockCount}</span>
-        </Link>
-        <Link href="/stock?status=backordered" className="flex justify-between text-red-700 hover:underline">
-          <span>Backordered</span>
-          <span className="font-medium">{health.backorderedCount}</span>
-        </Link>
+      <div className="mt-3 space-y-1.5">
+        <Row href="/stock" label="In stock" value={health.inStockCount} dot="bg-green-600" />
+        <Row href="/stock?status=low_stock" label="Low stock" value={health.lowStockCount} dot="bg-amber-600" />
+        <Row href="/stock?status=out_of_stock" label="Out of stock" value={health.outOfStockCount} dot="bg-gray-400" />
+        <Row href="/stock?status=backordered" label="Backordered" value={health.backorderedCount} dot="bg-red-600" />
       </div>
     </div>
   )

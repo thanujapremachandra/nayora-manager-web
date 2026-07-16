@@ -15,9 +15,9 @@ interface DialogProps {
 // w-[calc(100%-2rem)] (instead of w-full) keeps a little breathing room on
 // phones, where the dialog would otherwise sit flush against both edges.
 const SIZE_CLASSES: Record<NonNullable<DialogProps['size']>, string> = {
-  sm: 'w-[calc(100%-2rem)] max-w-sm rounded-xl',
-  md: 'w-[calc(100%-2rem)] max-w-lg rounded-xl',
-  lg: 'w-[calc(100%-2rem)] max-w-2xl rounded-xl',
+  sm: 'w-[calc(100%-2rem)] max-w-sm rounded-2xl',
+  md: 'w-[calc(100%-2rem)] max-w-lg rounded-2xl',
+  lg: 'w-[calc(100%-2rem)] max-w-2xl rounded-2xl',
   // Full-screen on mobile; a wide right-anchored panel on desktop —
   // these host the big product/order editors, which need real room.
   slideover: 'fixed inset-y-0 right-0 ml-auto h-full w-full rounded-none sm:max-w-3xl lg:max-w-5xl',
@@ -74,7 +74,7 @@ export function Dialog({ open, onClose, title, children, size = 'md', footer }: 
       ref={ref}
       aria-labelledby={titleId}
       onClose={onClose}
-      className={`${SIZE_CLASSES[size]} m-auto max-h-[90vh] flex-col overflow-hidden bg-white p-0 shadow-xl backdrop:bg-black/40 open:flex`}
+      className={`${SIZE_CLASSES[size]} m-auto max-h-[90vh] flex-col overflow-hidden border border-gray-200 bg-surface p-0 text-gray-900 shadow-xl backdrop:bg-black/60 backdrop:backdrop-blur-sm open:flex`}
     >
       <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
         <h2 id={titleId} className="text-lg font-semibold text-gray-900">

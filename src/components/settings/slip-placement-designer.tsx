@@ -144,7 +144,7 @@ export function SlipPlacementDesigner({ settings: initialSettings }: Props) {
     return (
       <div
         key={p.id}
-        className="absolute overflow-hidden border border-gray-400 bg-white"
+        className="absolute overflow-hidden border border-gray-400 bg-white text-black"
         style={{ left: `${p.x}mm`, top: `${p.y}mm`, width: `${p.width}mm`, height: `${p.height}mm` }}
       >
         <div
@@ -212,7 +212,7 @@ export function SlipPlacementDesigner({ settings: initialSettings }: Props) {
               <div style={{ width: `${page.width * PAGE_ZOOM}mm`, height: `${page.height * PAGE_ZOOM}mm` }}>
                 <div
                   ref={canvasRef}
-                  className="relative origin-top-left bg-white shadow"
+                  className="relative origin-top-left bg-white text-black shadow"
                   style={{ width: `${page.width}mm`, height: `${page.height}mm`, border: '1px solid #999', transform: `scale(${PAGE_ZOOM})` }}
                   onPointerDown={() => setSelectedId(null)}
                 >
@@ -241,7 +241,7 @@ export function SlipPlacementDesigner({ settings: initialSettings }: Props) {
             <div className="inline-block overflow-auto rounded-lg bg-gray-100 p-4">
               <div style={{ width: `${page.width * PAGE_ZOOM}mm`, height: `${page.height * PAGE_ZOOM}mm` }}>
                 <div
-                  className="relative origin-top-left bg-white shadow"
+                  className="relative origin-top-left bg-white text-black shadow"
                   style={{ width: `${page.width}mm`, height: `${page.height}mm`, border: '1px solid #999', transform: `scale(${PAGE_ZOOM})` }}
                 >
                   {layout.placements.map((p) => renderMiniSlip(backPlacementFor(p, layout), 'Slip back'))}

@@ -14,10 +14,12 @@ const TONE_STYLES: Record<NonNullable<Props['tone']>, string> = {
 
 export function KpiCard({ label, value, hint, tone = 'default' }: Props) {
   return (
-    <div className="card p-4">
-      <p className="text-xs font-medium text-gray-500">{label}</p>
-      <p className={`mt-1 text-2xl font-bold ${TONE_STYLES[tone]}`}>{value}</p>
-      {hint && <p className="mt-0.5 text-xs text-gray-400">{hint}</p>}
+    <div className="card p-4 sm:p-5">
+      <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{label}</p>
+      <p className={`mt-1.5 font-display text-2xl font-bold tracking-tight sm:text-3xl ${TONE_STYLES[tone]}`}>
+        {value}
+      </p>
+      {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
     </div>
   )
 }

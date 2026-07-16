@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getSettings } from '@/lib/db/settings'
 import { getSessionTrend, getSalesSummary, getStockHealth, getAttentionCounts } from '@/lib/db/analytics'
-import { TrendChart } from '@/components/home/trend-chart'
 import { KpiCard } from '@/components/home/kpi-card'
 import { TopItemsCard } from '@/components/home/top-items-card'
 import { StockHealthCard } from '@/components/home/stock-health-card'
@@ -56,18 +55,8 @@ export default async function HomePage() {
           />
         </div>
 
-        {/* Trend */}
-        <div className="card mt-4 p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-900">COD revenue by session</h3>
-            <Link href="/orders" className="text-xs font-medium text-brand-600 hover:text-brand-700">
-              View sessions →
-            </Link>
-          </div>
-          <div className="mt-3">
-            <TrendChart points={trend} />
-          </div>
-        </div>
+        {/* Reports (in the old trend-chart slot — the trend widget is gone) */}
+        <ReportsSection settings={settings} />
 
         {/* Items + health */}
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -79,8 +68,6 @@ export default async function HomePage() {
           <StockHealthCard health={stockHealth} />
           <AttentionCard attention={attention} />
         </div>
-
-        <ReportsSection settings={settings} />
       </div>
     )
   } catch (err) {

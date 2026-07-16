@@ -114,15 +114,13 @@ export function ReportsSection({ settings }: Props) {
       </div>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="seg">
           {REPORT_TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setReportType(tab.id)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium ${
-                reportType === tab.id ? 'bg-brand-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              className={`seg-item ${reportType === tab.id ? 'seg-item-active' : ''}`}
             >
               {tab.label}
             </button>

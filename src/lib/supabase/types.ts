@@ -95,6 +95,7 @@ export type Database = {
           auto_weight_threshold: number
           auto_weight_over_grams: number
           auto_weight_under_grams: number
+          brand_color: string | null
           created_at: string
           updated_at: string
         }
@@ -118,6 +119,7 @@ export type Database = {
           auto_weight_threshold?: number
           auto_weight_over_grams?: number
           auto_weight_under_grams?: number
+          brand_color?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -141,6 +143,7 @@ export type Database = {
           auto_weight_threshold?: number
           auto_weight_over_grams?: number
           auto_weight_under_grams?: number
+          brand_color?: string | null
           created_at?: string
           updated_at?: string
         }

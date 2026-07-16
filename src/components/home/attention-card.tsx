@@ -14,14 +14,26 @@ export function AttentionCard({ attention }: Props) {
       {nothingToFlag ? (
         <p className="mt-2 text-sm text-gray-500">Nothing frozen or flagged right now.</p>
       ) : (
-        <div className="mt-2 space-y-1.5 text-sm">
-          <Link href="/orders?status=frozen" className="flex justify-between text-cyan-700 hover:underline">
-            <span>Frozen orders</span>
-            <span className="font-medium">{attention.frozenCount}</span>
+        <div className="mt-3 space-y-1.5">
+          <Link
+            href="/orders?status=frozen"
+            className="flex items-center justify-between rounded-xl bg-gray-100 px-3.5 py-2.5 text-sm transition-colors hover:bg-gray-200"
+          >
+            <span className="flex items-center gap-2 text-gray-700">
+              <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-cyan-600" />
+              Frozen orders
+            </span>
+            <span className="font-display font-semibold text-gray-900">{attention.frozenCount}</span>
           </Link>
-          <Link href="/orders?status=issue" className="flex justify-between text-red-700 hover:underline">
-            <span>Issue orders</span>
-            <span className="font-medium">{attention.issueCount}</span>
+          <Link
+            href="/orders?status=issue"
+            className="flex items-center justify-between rounded-xl bg-gray-100 px-3.5 py-2.5 text-sm transition-colors hover:bg-gray-200"
+          >
+            <span className="flex items-center gap-2 text-gray-700">
+              <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-red-600" />
+              Issue orders
+            </span>
+            <span className="font-display font-semibold text-gray-900">{attention.issueCount}</span>
           </Link>
         </div>
       )}

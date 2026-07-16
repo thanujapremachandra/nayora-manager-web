@@ -597,7 +597,7 @@ export function OrderDialog({ open, onClose, onSaved, orderId, sessionId, settin
                     }}
                   />
                   {showAutofill && autofillResults.length > 0 && (
-                    <div className="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
+                    <div className="absolute z-10 mt-1 w-full rounded-xl border border-gray-200 bg-surface shadow-lg">
                       {autofillResults.slice(0, 5).map((m) => (
                         <button
                           key={m.id}
@@ -643,7 +643,7 @@ export function OrderDialog({ open, onClose, onSaved, orderId, sessionId, settin
                       <button
                         key={p.id}
                         onClick={() => setViewingOrderId(p.id)}
-                        className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-100"
+                        className="rounded-full bg-surface px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-200"
                       >
                         {p.ref_id}
                       </button>
@@ -766,18 +766,18 @@ export function OrderDialog({ open, onClose, onSaved, orderId, sessionId, settin
                     </h3>
                     <div className="flex items-center gap-2">
                       {canToggleMode && (
-                        <div className="inline-flex overflow-hidden rounded-lg border border-gray-300 text-xs">
+                        <div className="seg">
                           <button
                             type="button"
                             onClick={() => handleSetEntryMode('stock')}
-                            className={`px-2.5 py-1 font-medium ${entryMode === 'stock' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                            className={`seg-item ${entryMode === 'stock' ? 'seg-item-active' : ''}`}
                           >
                             From stock
                           </button>
                           <button
                             type="button"
                             onClick={() => handleSetEntryMode('text')}
-                            className={`px-2.5 py-1 font-medium ${entryMode === 'text' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                            className={`seg-item ${entryMode === 'text' ? 'seg-item-active' : ''}`}
                           >
                             Write it
                           </button>

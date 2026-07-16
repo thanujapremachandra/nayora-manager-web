@@ -16,10 +16,27 @@ export interface ChangelogEntry {
   image?: string
 }
 
-export const APP_VERSION = '1.1.0'
+export const APP_VERSION = '2.0.0'
 
 // Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.0.0',
+    date: '2026-07-16',
+    title: 'A whole new look',
+    changes: [
+      'Complete visual redesign — new fonts, rounded cards, pill buttons, and a fresh wordmark',
+      'Dark mode! Follows your device by default; switch anytime from the sidebar toggle',
+      'Pick your own primary color in Settings → Appearance (color wheel, hex code, or presets)',
+      'Settings reorganized into clear tabs — Business, Orders, Stock, Appearance, and more',
+      'Floating save bar appears whenever you have unsaved settings changes',
+      'Reports moved up to the top of the dashboard',
+      'Session actions tidied: Export dropdown (Excel / slips / summary), green "mark as sent", clearer back button',
+      'Tracking pool now counts on-hold numbers correctly and refreshes automatically',
+      'Pages respond instantly while loading, with smooth placeholder screens',
+    ],
+    // image: '/changelog/2-0-0.png',
+  },
   {
     version: '1.1.0',
     date: '2026-07-16',

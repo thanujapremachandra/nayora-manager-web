@@ -46,6 +46,19 @@ export function TrackingPoolPanel() {
 
   useEffect(() => {
     void loadStats()
+    // Stats go stale when orders are frozen/unfrozen/deleted elsewhere (inside
+    // a session view, another tab, …) — refresh whenever this view regains
+    // focus or becomes visible again rather than only on first mount.
+    const onFocus = () => void loadStats()
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void loadStats()
+    }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [])
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -247,16 +260,12 @@ export function TrackingPoolPanel() {
         ) : listEntries ? (
           <>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex flex-wrap gap-1.5">
+              <div className="seg">
                 {(['all', 'available', 'assigned', 'frozen'] as ListFilter[]).map((f) => (
                   <button
                     key={f}
                     onClick={() => setListFilter(f)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                      listFilter === f
-                        ? 'bg-brand-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                    className={`seg-item ${listFilter === f ? 'seg-item-active' : ''}`}
                   >
                     {FILTER_LABELS[f]} ({filterCounts?.[f] ?? 0})
                   </button>
@@ -277,7 +286,7 @@ export function TrackingPoolPanel() {
                 <p className="py-10 text-center text-sm text-gray-400">No entries in this category.</p>
               ) : (
                 <table className="w-full text-sm">
-                  <thead className="sticky top-0 bg-white">
+                  <thead className="sticky top-0 bg-surface">
                     <tr className="border-b border-gray-200 text-left text-xs text-gray-500">
                       <th className="w-8 py-1.5 pr-2 font-medium">
                         <input

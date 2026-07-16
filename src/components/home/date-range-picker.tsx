@@ -38,17 +38,13 @@ export function DateRangePicker({ range, onChange }: Props) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="flex flex-wrap gap-1">
+      <div className="seg">
         {PRESETS.map((p) => (
           <button
             key={p.label}
             type="button"
             onClick={() => onChange(p.range())}
-            className={`rounded-lg px-2.5 py-1 text-xs font-medium ${
-              activePreset?.label === p.label
-                ? 'bg-brand-100 text-brand-700'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+            className={`seg-item ${activePreset?.label === p.label ? 'seg-item-active' : ''}`}
           >
             {p.label}
           </button>

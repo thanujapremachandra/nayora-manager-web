@@ -148,7 +148,7 @@ export function SlipDesigner({ settings: initialSettings }: Props) {
           <button
             key={key}
             onPointerDown={(e) => handlePaletteDown(key, e)}
-            className="cursor-grab touch-none rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm active:cursor-grabbing"
+            className="cursor-grab touch-none rounded-full border border-gray-300 bg-surface px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm active:cursor-grabbing"
           >
             + {SLIP_FIELD_LABELS[key]}
           </button>
@@ -163,7 +163,7 @@ export function SlipDesigner({ settings: initialSettings }: Props) {
           >
             <div
               ref={canvasRef}
-              className="relative origin-top-left bg-white shadow"
+              className="relative origin-top-left bg-white text-black shadow"
               style={{
                 width: `${SLIP_BOX_WIDTH_MM}mm`,
                 height: `${SLIP_BOX_HEIGHT_MM}mm`,

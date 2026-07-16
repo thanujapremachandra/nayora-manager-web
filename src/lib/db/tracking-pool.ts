@@ -27,14 +27,18 @@ export async function getPoolStats(client: TypedClient): Promise<PoolStats> {
   const available = availableResult.count ?? 0
   const assignedIds = (assignedIdsResult.data ?? []).map((e) => e.order_id as string)
 
+  // "On hold" counts pool ENTRIES held by frozen orders, not frozen orders —
+  // one frozen order can hold several numbers, and counting orders made the
+  // badge undercount (and inflated "assigned" by the same amount).
   let frozen = 0
   if (assignedIds.length > 0) {
-    const { count } = await client
+    const { data: frozenOrders } = await client
       .from('orders')
-      .select('*', { count: 'exact', head: true })
+      .select('id')
       .in('id', assignedIds)
       .eq('status', 'frozen')
-    frozen = count ?? 0
+    const frozenSet = new Set((frozenOrders ?? []).map((o) => o.id))
+    frozen = assignedIds.filter((id) => frozenSet.has(id)).length
   }
 
   return { total, available, assigned: total - available - frozen, frozen }

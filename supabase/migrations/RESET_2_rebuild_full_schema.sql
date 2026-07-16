@@ -1,12 +1,12 @@
 -- ============================================================
 -- RESET 2 of 3  —  REBUILD THE FULL SCHEMA
 -- ============================================================
--- The complete, current schema — every migration 001 → 013
+-- The complete, current schema — every migration 001 → 015
 -- consolidated into one clean file (final column state only,
 -- none of the add-then-drop churn). Running this on the empty
 -- schema left by RESET_1 fully recreates the database.
 --
--- If you prefer, running migrations 001…013 in order produces
+-- If you prefer, running migrations 001…015 in order produces
 -- the exact same result; this is just the single-file version.
 -- ============================================================
 
@@ -35,6 +35,7 @@ CREATE TABLE settings (
   auto_weight_threshold numeric(12, 2) NOT NULL DEFAULT 3,
   auto_weight_over_grams int NOT NULL DEFAULT 1000,
   auto_weight_under_grams int NOT NULL DEFAULT 800,
+  brand_color text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
