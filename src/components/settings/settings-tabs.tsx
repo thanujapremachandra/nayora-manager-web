@@ -5,6 +5,7 @@ import { SettingsForm } from './settings-form'
 import { ExportColumnsManager } from './export-columns-manager'
 import { SlipDesigner } from './slip-designer'
 import { SlipPlacementDesigner } from './slip-placement-designer'
+import { VersionInfo } from './version-info'
 import type { Settings, ExportColumn } from '@/lib/supabase/types'
 
 interface Props {
@@ -41,7 +42,12 @@ export function SettingsTabs({ settings, initialExportColumns }: Props) {
       </div>
 
       <div role="tabpanel" id={`tabpanel-${tab}`} aria-labelledby={`tab-${tab}`}>
-        {tab === 'General' && <div className="max-w-2xl"><SettingsForm settings={settings} /></div>}
+        {tab === 'General' && (
+          <div className="max-w-2xl space-y-6">
+            <SettingsForm settings={settings} />
+            <VersionInfo />
+          </div>
+        )}
         {tab === 'Excel Export' && <div className="max-w-2xl"><ExportColumnsManager initialColumns={initialExportColumns} /></div>}
         {tab === 'Slip Designer' && <SlipDesigner settings={settings} />}
         {tab === 'Slip Placement' && <SlipPlacementDesigner settings={settings} />}

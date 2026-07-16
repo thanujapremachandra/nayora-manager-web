@@ -1,4 +1,6 @@
 import { AppNav } from '@/components/nav'
+import { WhatsNew } from '@/components/whats-new'
+import { UpdatePrompt } from '@/components/update-prompt'
 
 // Auth is enforced in middleware.ts (it redirects unauthenticated requests to
 // /login before this layout ever renders), so there's no getUser() here — that
@@ -14,6 +16,10 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
       <main className="flex-1 pb-20 md:pb-0">
         {children}
       </main>
+
+      {/* Release-notes popup (once per version) + reload-to-update prompt */}
+      <WhatsNew />
+      <UpdatePrompt />
     </div>
   )
 }
