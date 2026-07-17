@@ -28,11 +28,19 @@ function liveVariantLabel(variant: VariantSummary): string {
   return variant.variant_attribute_values.map((v) => v.attribute_values.value).join(' / ')
 }
 
-// A single-line summary of what an order contains, for list views. Written
-// orders (items_text set) show their typed text; stock orders show their
-// item labels with quantities. Empty for an order with neither.
+// A single-line summary of what an order contains, for list views and the
+// printed summary. Written orders (items_text set) show their typed text
+// with line breaks flattened to ", " — on a one-line summary a swallowed
+// newline would make two items read as one. Stock orders show their item
+// labels with quantities. Empty for an order with neither.
 export function orderContentsSummary(order: Pick<OrderWithDetails, 'items_text' | 'order_items'>): string {
-  if (order.items_text && order.items_text.trim()) return order.items_text.trim()
+  if (order.items_text && order.items_text.trim()) {
+    return order.items_text
+      .split(/\r?\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .join(', ')
+  }
   return order.order_items.map((i) => `${orderItemLabel(i)} ×${i.qty}`).join(', ')
 }
 

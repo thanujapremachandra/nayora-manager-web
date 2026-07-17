@@ -2,12 +2,27 @@ import type { ExportColumn, Settings } from '@/lib/supabase/types'
 import type { OrderWithDetails } from '@/lib/order-helpers'
 import { computeCollectableAmount, effectiveWeightGrams, gramsToKgG } from '@/lib/pricing'
 
+// Multi-line text (textarea addresses) flattened onto one line for Excel
+// cells: line breaks become ", ".
+function singleLine(text: string): string {
+  return text
+    .split(/\r?\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(', ')
+}
+
 function receiverCity(address: string): string {
-  // Replicates the operator's manual process: the city is the last word
-  // of the address line.
-  const trimmed = address.trim().replace(/[.,]+$/, '')
-  const parts = trimmed.split(/\s+/)
-  return parts[parts.length - 1] ?? ''
+  // Replicates the operator's manual process: the city is the last word of
+  // the address. Walk backwards through the words, stripping any symbols
+  // stuck to them (",kandy", "/kandy", "kandy.") — a word that's ONLY
+  // symbols or spaces is skipped entirely and the previous word is used.
+  const words = address.split(/\s+/)
+  for (let i = words.length - 1; i >= 0; i--) {
+    const cleaned = words[i].replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '')
+    if (cleaned) return cleaned
+  }
+  return ''
 }
 
 function receiverContact(order: Pick<OrderWithDetails, 'phone1' | 'phone2'>): string {
@@ -25,7 +40,7 @@ export function resolveColumnValue(column: ExportColumn, order: OrderWithDetails
     case 'receiver_name':
       return order.customer_name
     case 'receiver_address':
-      return order.address
+      return singleLine(order.address)
     case 'receiver_city':
       return receiverCity(order.address) || (column.fallback_value ?? '')
     case 'receiver_contact':
