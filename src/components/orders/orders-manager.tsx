@@ -47,6 +47,24 @@ export function OrdersManager({
   const [statusFilter, setStatusFilter] = useState(initialStatusFilter)
   const [filteredOrders, setFilteredOrders] = useState(initialFilteredOrders)
 
+  // Session filter panel (date / date-range / name — separate from the main
+  // order search).
+  const [sessionFilterOpen, setSessionFilterOpen] = useState(false)
+  const [fDate, setFDate] = useState('')
+  const [fFrom, setFFrom] = useState('')
+  const [fTo, setFTo] = useState('')
+  const [fSearchOpen, setFSearchOpen] = useState(false)
+  const [fName, setFName] = useState('')
+  const sessionFilterActive = Boolean(fDate || fFrom || fTo || fName.trim())
+
+  function clearSessionFilter() {
+    setFDate('')
+    setFFrom('')
+    setFTo('')
+    setFName('')
+    setFSearchOpen(false)
+  }
+
   useEffect(() => {
     if (!globalSearch.trim() || activeSession) {
       setGlobalResults([])
@@ -110,6 +128,21 @@ export function OrdersManager({
     [sessions]
   )
 
+  // 'en-CA' formats as local YYYY-MM-DD, directly comparable with the
+  // <input type="date"> values.
+  const sessionsFiltered = useMemo(() => {
+    let list = sessionsSorted
+    const localDay = (iso: string) => new Date(iso).toLocaleDateString('en-CA')
+    if (fDate) list = list.filter((s) => localDay(s.created_at) === fDate)
+    if (fFrom) list = list.filter((s) => localDay(s.created_at) >= fFrom)
+    if (fTo) list = list.filter((s) => localDay(s.created_at) <= fTo)
+    if (fName.trim()) {
+      const q = fName.trim().toLowerCase()
+      list = list.filter((s) => s.name.toLowerCase().includes(q))
+    }
+    return list
+  }, [sessionsSorted, fDate, fFrom, fTo, fName])
+
   const totals = useMemo(() => {
     let orders = 0
     let pending = 0
@@ -160,16 +193,130 @@ export function OrdersManager({
 
       <TrackingPoolPanel />
 
-      <input
-        type="search"
-        placeholder="Search all orders — ref id, name, phone, tracking, item…"
-        className="input mt-4 max-w-md"
-        value={globalSearch}
-        onChange={(e) => {
-          setGlobalSearch(e.target.value)
-          setStatusFilter(null)
-        }}
-      />
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          placeholder="Search all orders — ref id, name, phone, tracking, item…"
+          className="input max-w-md flex-1"
+          value={globalSearch}
+          onChange={(e) => {
+            setGlobalSearch(e.target.value)
+            setStatusFilter(null)
+          }}
+        />
+
+        {/* Session filter (dates + name — independent of the order search) */}
+        <button
+          type="button"
+          onClick={() => setSessionFilterOpen((o) => !o)}
+          aria-expanded={sessionFilterOpen}
+          aria-label="Filter sessions"
+          className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium shadow-sm transition-colors ${
+            sessionFilterActive
+              ? 'border-brand-500 bg-brand-50 text-brand-700'
+              : 'border-gray-300 bg-surface text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} className="h-4 w-4" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+          </svg>
+          Sessions
+          {sessionFilterActive && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-500" />}
+        </button>
+      </div>
+
+      {sessionFilterOpen && (
+        <div className="card mt-3 flex flex-wrap items-end gap-3 p-3.5">
+          <div>
+            <label className="mb-1 block text-[11px] font-medium text-gray-500">Exact date</label>
+            <input
+              type="date"
+              className="input w-auto py-1.5 text-sm"
+              value={fDate}
+              onChange={(e) => {
+                setFDate(e.target.value)
+                // Exact date and range are alternatives — picking one clears the other.
+                setFFrom('')
+                setFTo('')
+              }}
+              aria-label="Filter sessions by date"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-[11px] font-medium text-gray-500">Or date range</label>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="date"
+                className="input w-auto py-1.5 text-sm"
+                value={fFrom}
+                max={fTo || undefined}
+                onChange={(e) => {
+                  setFFrom(e.target.value)
+                  setFDate('')
+                }}
+                aria-label="Sessions from date"
+              />
+              <span className="text-xs text-gray-400">to</span>
+              <input
+                type="date"
+                className="input w-auto py-1.5 text-sm"
+                value={fTo}
+                min={fFrom || undefined}
+                onChange={(e) => {
+                  setFTo(e.target.value)
+                  setFDate('')
+                }}
+                aria-label="Sessions to date"
+              />
+            </div>
+          </div>
+
+          {/* Name search within the date filter — hidden until the icon is clicked */}
+          <div className="flex items-end gap-1.5">
+            <button
+              type="button"
+              onClick={() => setFSearchOpen((o) => !o)}
+              aria-label="Search sessions by name"
+              aria-expanded={fSearchOpen}
+              className={`rounded-full border p-2 transition-colors ${
+                fSearchOpen || fName ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-gray-300 bg-surface text-gray-500 hover:bg-gray-100'
+              }`}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} className="h-4 w-4" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+            </button>
+            {fSearchOpen && (
+              <input
+                autoFocus
+                type="search"
+                placeholder="Session name…"
+                className="input w-44 py-1.5 text-sm"
+                value={fName}
+                onChange={(e) => setFName(e.target.value)}
+              />
+            )}
+          </div>
+
+          {sessionFilterActive && (
+            <button
+              type="button"
+              onClick={clearSessionFilter}
+              aria-label="Clear session filters"
+              className="mb-0.5 inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Clear
+            </button>
+          )}
+
+          <p className="mb-1 basis-full text-xs text-gray-400 sm:mb-0 sm:basis-auto">
+            {sessionsFiltered.length} of {sessions.length} session(s)
+          </p>
+        </div>
+      )}
 
       {statusFilter && (
         <div className="mt-3 flex items-center gap-2 text-sm">
@@ -260,7 +407,7 @@ export function OrdersManager({
                 </tr>
               </thead>
               <tbody>
-                {sessionsSorted.map((session) => {
+                {sessionsFiltered.map((session) => {
                   const c = counts.get(session.id) ?? { total: 0, pending: 0, frozen: 0 }
                   return (
                     <tr
@@ -301,7 +448,7 @@ export function OrdersManager({
 
           {/* Mobile: stacked cards */}
           <div className="mt-4 grid grid-cols-1 gap-3 md:hidden">
-            {sessionsSorted.map((session) => (
+            {sessionsFiltered.map((session) => (
               <SessionCard
                 key={session.id}
                 session={session}

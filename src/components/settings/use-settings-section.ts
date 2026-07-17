@@ -42,5 +42,5 @@ export function useSettingsSection<T extends SettingsPatch>(settings: Settings, 
     setError(null)
   }
 
-  return { values, set, dirty, saving, saved, error, save, cancel }
+  return { values, set, dirty, saving, saved, error, save, cancel, baseline }
 }

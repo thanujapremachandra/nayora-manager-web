@@ -1,12 +1,12 @@
 -- ============================================================
 -- RESET 2 of 3  —  REBUILD THE FULL SCHEMA
 -- ============================================================
--- The complete, current schema — every migration 001 → 017
+-- The complete, current schema — every migration 001 → 018
 -- consolidated into one clean file (final column state only,
 -- none of the add-then-drop churn). Running this on the empty
 -- schema left by RESET_1 fully recreates the database.
 --
--- If you prefer, running migrations 001…017 in order produces
+-- If you prefer, running migrations 001…018 in order produces
 -- the exact same result; this is just the single-file version.
 -- ============================================================
 
@@ -40,6 +40,8 @@ CREATE TABLE settings (
   card_color_dark text,
   bg_color_light text,
   bg_color_dark text,
+  outline_color_light text,
+  outline_color_dark text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );

@@ -1,11 +1,27 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useSettingsSection } from './use-settings-section'
 import { SaveBar } from '@/components/ui/save-bar'
 import { VersionInfo } from './version-info'
-import { buildThemeCss, isValidHex, normalizeHex, DEFAULT_BRAND_HEX } from '@/lib/brand-color'
+import { buildThemeCss, isValidHex, normalizeHex, DEFAULT_BRAND_HEX, type ThemeOverrides } from '@/lib/brand-color'
 import type { Settings } from '@/lib/supabase/types'
+
+// The layout renders <style id="nayora-theme"> server-side. This form writes
+// to that same element (creating it in <head> if the defaults meant it wasn't
+// rendered), so picks preview live AND survive leaving the tab — the old
+// approach used a separate preview element that was removed on unmount,
+// which made saved colors seem to only work inside Appearance.
+function themeStyleElement(): HTMLStyleElement {
+  let el = document.getElementById('nayora-theme') as HTMLStyleElement | null
+  if (!el) {
+    el = document.createElement('style')
+    el.id = 'nayora-theme'
+    document.head.appendChild(el)
+  }
+  return el
+}
 
 // A few ready-made choices (default violet, the reference dashboard's
 // green/peach family, and some safe classics).
@@ -35,6 +51,8 @@ export function AppearanceForm({ settings }: { settings: Settings }) {
     card_color_dark: settings.card_color_dark,
     bg_color_light: settings.bg_color_light,
     bg_color_dark: settings.bg_color_dark,
+    outline_color_light: settings.outline_color_light,
+    outline_color_dark: settings.outline_color_dark,
   })
   const [hexInput, setHexInput] = useState(settings.brand_color ?? '')
   const [themeMode, setThemeMode] = useState<ThemeMode>('system')
@@ -60,26 +78,43 @@ export function AppearanceForm({ settings }: { settings: Settings }) {
     ? normalizeHex(s.values.brand_color)
     : DEFAULT_BRAND_HEX
 
-  // Live preview: a <style> appended to <body> comes after the layout's
-  // server-rendered override in the DOM, so it wins while this tab is open.
+  const toOverrides = (v: typeof s.values): ThemeOverrides => ({
+    brand: v.brand_color,
+    cardLight: v.card_color_light ?? null,
+    cardDark: v.card_color_dark ?? null,
+    bgLight: v.bg_color_light ?? null,
+    bgDark: v.bg_color_dark ?? null,
+    outlineLight: v.outline_color_light ?? null,
+    outlineDark: v.outline_color_dark ?? null,
+  })
+
+  // Live preview into the shared theme element. On unmount, restore the
+  // last-SAVED values (not remove) so saved colors keep applying app-wide.
+  const baselineRef = useRef(s.baseline)
+  baselineRef.current = s.baseline
   useEffect(() => {
-    let el = document.getElementById('brand-preview') as HTMLStyleElement | null
-    if (!el) {
-      el = document.createElement('style')
-      el.id = 'brand-preview'
-      document.body.appendChild(el)
-    }
-    el.textContent = buildThemeCss({
-      brand: effectiveBrand,
-      cardLight: s.values.card_color_light ?? null,
-      cardDark: s.values.card_color_dark ?? null,
-      bgLight: s.values.bg_color_light ?? null,
-      bgDark: s.values.bg_color_dark ?? null,
-    })
+    themeStyleElement().textContent = buildThemeCss({ ...toOverrides(s.values), brand: effectiveBrand })
     return () => {
-      el?.remove()
+      themeStyleElement().textContent = buildThemeCss(toOverrides(baselineRef.current))
     }
-  }, [effectiveBrand, s.values.card_color_light, s.values.card_color_dark, s.values.bg_color_light, s.values.bg_color_dark])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the individual values below
+  }, [
+    effectiveBrand,
+    s.values.card_color_light,
+    s.values.card_color_dark,
+    s.values.bg_color_light,
+    s.values.bg_color_dark,
+    s.values.outline_color_light,
+    s.values.outline_color_dark,
+  ])
+
+  const router = useRouter()
+  async function saveAndRefresh() {
+    await s.save()
+    // Re-render the server layout so its <style id="nayora-theme"> carries
+    // the new colors for future navigations/reloads too.
+    router.refresh()
+  }
 
   function pickBrand(hex: string) {
     const normalized = normalizeHex(hex)
@@ -290,9 +325,60 @@ export function AppearanceForm({ settings }: { settings: Settings }) {
         </div>
       </div>
 
+      {/* Card outline colors */}
+      <div className="card divide-y divide-gray-100">
+        <div className="px-5 py-4">
+          <h2 className="text-sm font-semibold text-gray-900">Card outline</h2>
+          <p className="mt-0.5 text-xs text-gray-500">
+            The border color of cards, dialogs and tables — set separately for light and dark mode.
+            Saved for every device.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
+          <div>
+            <span className="label mb-1.5 block">In light mode</span>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                aria-label="Card outline in light mode"
+                className="h-10 w-14 cursor-pointer rounded-xl border border-gray-300 bg-surface p-1"
+                value={s.values.outline_color_light && isValidHex(s.values.outline_color_light) ? normalizeHex(s.values.outline_color_light) : '#e5e7eb'}
+                onChange={(e) => s.set('outline_color_light', normalizeHex(e.target.value))}
+              />
+              <button
+                type="button"
+                onClick={() => s.set('outline_color_light', null)}
+                className="btn-secondary px-3 py-1.5 text-xs"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+          <div>
+            <span className="label mb-1.5 block">In dark mode</span>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                aria-label="Card outline in dark mode"
+                className="h-10 w-14 cursor-pointer rounded-xl border border-gray-300 bg-surface p-1"
+                value={s.values.outline_color_dark && isValidHex(s.values.outline_color_dark) ? normalizeHex(s.values.outline_color_dark) : '#2e2b40'}
+                onChange={(e) => s.set('outline_color_dark', normalizeHex(e.target.value))}
+              />
+              <button
+                type="button"
+                onClick={() => s.set('outline_color_dark', null)}
+                className="btn-secondary px-3 py-1.5 text-xs"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <VersionInfo />
 
-      <SaveBar dirty={s.dirty} saving={s.saving} saved={s.saved} error={s.error} onSave={s.save} onCancel={s.cancel} />
+      <SaveBar dirty={s.dirty} saving={s.saving} saved={s.saved} error={s.error} onSave={saveAndRefresh} onCancel={s.cancel} />
     </div>
   )
 }

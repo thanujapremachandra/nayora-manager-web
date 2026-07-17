@@ -101,10 +101,13 @@ export interface ThemeOverrides {
   cardDark?: string | null
   bgLight?: string | null
   bgDark?: string | null
+  outlineLight?: string | null
+  outlineDark?: string | null
 }
 
-// Combined theme override: brand ramp + per-theme card (surface) and page
-// background (--gray-50, the body color) overrides. Any null/invalid piece
+// Combined theme override: brand ramp + per-theme card (--surface), page
+// background (--gray-50, the body color) and outline (--gray-200, the border
+// token used by cards/dialogs/tables) overrides. Any null/invalid piece
 // falls back to the built-in default.
 export function buildThemeCss(o: ThemeOverrides): string {
   let css = o.brand && isValidHex(o.brand) ? buildBrandCss(o.brand) : ''
@@ -112,12 +115,36 @@ export function buildThemeCss(o: ThemeOverrides): string {
   let lightBlock = ''
   if (o.cardLight && isValidHex(o.cardLight)) lightBlock += `--surface:${hexToTriplet(o.cardLight)};`
   if (o.bgLight && isValidHex(o.bgLight)) lightBlock += `--gray-50:${hexToTriplet(o.bgLight)};`
+  if (o.outlineLight && isValidHex(o.outlineLight)) lightBlock += `--gray-200:${hexToTriplet(o.outlineLight)};`
   if (lightBlock) css += `:root{${lightBlock}}`
 
   let darkBlock = ''
   if (o.cardDark && isValidHex(o.cardDark)) darkBlock += `--surface:${hexToTriplet(o.cardDark)};`
   if (o.bgDark && isValidHex(o.bgDark)) darkBlock += `--gray-50:${hexToTriplet(o.bgDark)};`
+  if (o.outlineDark && isValidHex(o.outlineDark)) darkBlock += `--gray-200:${hexToTriplet(o.outlineDark)};`
   if (darkBlock) css += `[data-theme='dark']{${darkBlock}}`
 
   return css
+}
+
+// Overrides built from a saved settings row (server layout + client updates
+// share this so they always agree).
+export function overridesFromSettings(s: {
+  brand_color: string | null
+  card_color_light: string | null
+  card_color_dark: string | null
+  bg_color_light: string | null
+  bg_color_dark: string | null
+  outline_color_light: string | null
+  outline_color_dark: string | null
+}): ThemeOverrides {
+  return {
+    brand: s.brand_color,
+    cardLight: s.card_color_light,
+    cardDark: s.card_color_dark,
+    bgLight: s.bg_color_light,
+    bgDark: s.bg_color_dark,
+    outlineLight: s.outline_color_light,
+    outlineDark: s.outline_color_dark,
+  }
 }

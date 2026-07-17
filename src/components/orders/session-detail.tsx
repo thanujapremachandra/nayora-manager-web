@@ -22,6 +22,7 @@ import { Dialog } from '@/components/ui/dialog'
 import { OrderRow } from './order-row'
 import { OrderDialog } from './order-dialog'
 import { FreezeDialog } from './freeze-dialog'
+import { STATUS_LABELS } from '@/lib/order-helpers'
 import type { OrderWithDetails } from '@/lib/order-helpers'
 import type { Session, Order, Settings } from '@/lib/supabase/types'
 
@@ -39,6 +40,8 @@ export function SessionDetail({ session: initialSession, initialOrders, settings
   const [session, setSession] = useState(initialSession)
   const [orders, setOrders] = useState(initialOrders)
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<Order['status'] | 'all'>('all')
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null)
   const [creatingOrder, setCreatingOrder] = useState(false)
@@ -60,9 +63,11 @@ export function SessionDetail({ session: initialSession, initialOrders, settings
   const [assignedTracking, setAssignedTracking] = useState<string | 'empty' | null>(null)
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return orders
+    let list = orders
+    if (statusFilter !== 'all') list = list.filter((o) => o.status === statusFilter)
+    if (!search.trim()) return list
     const q = search.trim().toLowerCase()
-    return orders.filter(
+    return list.filter(
       (o) =>
         o.ref_id.toLowerCase().includes(q) ||
         o.customer_name.toLowerCase().includes(q) ||
@@ -72,7 +77,7 @@ export function SessionDetail({ session: initialSession, initialOrders, settings
         o.order_items.some((i) => i.variants.products.name.toLowerCase().includes(q)) ||
         (o.items_text?.toLowerCase().includes(q) ?? false)
     )
-  }, [orders, search])
+  }, [orders, search, statusFilter])
 
   async function refresh() {
     const data = await listOrdersBySession(createClient(), session.id)
@@ -412,13 +417,89 @@ export function SessionDetail({ session: initialSession, initialOrders, settings
         </p>
       )}
 
-      <input
-        type="search"
-        placeholder="Search ref id, name, phone, tracking, item…"
-        className="input mt-4 max-w-md"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          placeholder="Search ref id, name, phone, tracking, item…"
+          className="input max-w-md flex-1"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        {/* Status filter */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setStatusMenuOpen((o) => !o)}
+            aria-haspopup="menu"
+            aria-expanded={statusMenuOpen}
+            className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium shadow-sm transition-colors ${
+              statusFilter !== 'all'
+                ? 'border-brand-500 bg-brand-50 text-brand-700'
+                : 'border-gray-300 bg-surface text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} className="h-4 w-4" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+            </svg>
+            {statusFilter === 'all' ? 'Filter' : STATUS_LABELS[statusFilter]}
+            {statusFilter !== 'all' && (
+              <span
+                role="button"
+                tabIndex={0}
+                aria-label="Clear status filter"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setStatusFilter('all')
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.stopPropagation()
+                    setStatusFilter('all')
+                  }
+                }}
+                className="text-brand-700/70 hover:text-brand-700"
+              >
+                ×
+              </span>
+            )}
+          </button>
+
+          {statusMenuOpen && (
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setStatusMenuOpen(false)} aria-hidden />
+              <div role="menu" className="absolute right-0 z-40 mt-2 w-44 overflow-hidden rounded-2xl border border-gray-200 bg-surface py-1.5 shadow-xl">
+                {(['all', 'pending', 'frozen', 'issue', 'sent', 'returned', 'cancelled'] as const).map((st) => (
+                  <button
+                    key={st}
+                    role="menuitem"
+                    onClick={() => {
+                      setStatusFilter(st)
+                      setStatusMenuOpen(false)
+                    }}
+                    className={`flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm font-medium transition-colors hover:bg-gray-100 ${
+                      statusFilter === st ? 'text-brand-700' : 'text-gray-700'
+                    }`}
+                  >
+                    {st === 'all' ? (
+                      <span aria-hidden className="h-2 w-2 rounded-full bg-gray-400" />
+                    ) : (
+                      <span
+                        aria-hidden
+                        className={`h-2 w-2 rounded-full ${
+                          st === 'pending' ? 'bg-blue-700' : st === 'frozen' ? 'bg-cyan-600' : st === 'issue' ? 'bg-red-600' : st === 'sent' ? 'bg-green-600' : st === 'returned' ? 'bg-orange-700' : 'bg-gray-400'
+                        }`}
+                      />
+                    )}
+                    {st === 'all' ? 'All statuses' : STATUS_LABELS[st]}
+                    {statusFilter === st && <span className="ml-auto">✓</span>}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       {error && (
         <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">

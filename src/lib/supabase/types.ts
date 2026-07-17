@@ -100,6 +100,8 @@ export type Database = {
           card_color_dark: string | null
           bg_color_light: string | null
           bg_color_dark: string | null
+          outline_color_light: string | null
+          outline_color_dark: string | null
           created_at: string
           updated_at: string
         }
@@ -128,6 +130,8 @@ export type Database = {
           card_color_dark?: string | null
           bg_color_light?: string | null
           bg_color_dark?: string | null
+          outline_color_light?: string | null
+          outline_color_dark?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -156,6 +160,8 @@ export type Database = {
           card_color_dark?: string | null
           bg_color_light?: string | null
           bg_color_dark?: string | null
+          outline_color_light?: string | null
+          outline_color_dark?: string | null
           created_at?: string
           updated_at?: string
         }
